@@ -1,0 +1,53 @@
+language: android
+before_cache:
+- rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+- rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+cache:
+  directories:
+  - "$HOME/.gradle/caches/"
+  - "$HOME/.gradle/wrapper/"
+  - "$HOME/google-cloud-sdk/"
+env:
+  global:
+  - ADB_INSTALL_TIMEOUT=16
+android:
+  components:
+  - tools
+  - platform-tools
+  - build-tools-28.0.3
+  - android-28
+  - android-22
+  - sys-img-armeabi-v7a-android-22
+  licenses:
+  - android-sdk-preview-license-.+
+  - android-sdk-license-.+
+  - google-gdk-license-.+
+before_install:
+- openssl aes-256-cbc -K $encrypted_4d0c3324f67c_key -iv $encrypted_4d0c3324f67c_iv
+  -in mynews-67b3d-firebase-adminsdk-e2gq4-2f8512af54.json.enc -out mynews-67b3d-firebase-adminsdk-e2gq4-2f8512af54.json
+  -d
+- yes | sdkmanager "build-tools;28.0.3"
+before_script:
+- echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a -c
+  32M
+- emulator -avd test -no-audio -no-window &
+- android-wait-for-emulator
+- adb devices
+- adb shell input keyevent 82 &
+- gcloud version || true
+- if [ ! -d "$HOME/google-cloud-sdk/bin" ]; then rm -rf $HOME/google-cloud-sdk; export
+  $CLOUDSDK_CORE_DISABLE_PROMPTS; curl https://sdk.cloud.google.com | bash; fi
+- source /home/travis/google-cloud-sdk/path.bash.inc
+- gcloud version
+- gcloud auth activate-service-account firebase-adminsdk-e2gq4@mynews-67b3d.iam.gserviceaccount.com
+  --key-file=mynews-67b3d-firebase-adminsdk-e2gq4-2f8512af54.json --project=mynews-67b3d
+script:
+- "./gradlew clean build connectedCheck -PdisablePreDex --stacktrace"
+- "./gradlew build assembleDebug"
+- gcloud components update
+- gcloud firebase test android run --app app/build/outputs/apk/debug/app-debug.apk
+  --type=robo --device model=Nexus4,version=19
+
+branches:
+  only:
+  - develop
