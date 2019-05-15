@@ -1,3 +1,6 @@
-# MyNews
+[![Build Status](https://travis-ci.org/gironnetd/MyNews.svg?branch=develop)](https://travis-ci.org/gironnetd/MyNews)
+<br />
 
-https://travis-ci.org/gironnetd/MyNews.svg?branch=develop
+## MyNews
+
+
