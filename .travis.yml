@@ -51,7 +51,7 @@ script:
 #- "./gradlew connectedCheck"
 - ./gradlew clean build connectedCheck -PdisablePreDex --stacktrace
 - ./gradlew build assembleDebug
-- gcloud components update || yes
+- yes Y | gcloud components update
 - gcloud firebase test android run --app app/build/outputs/apk/debug/app-debug.apk --type=robo --device model=Nexus4,version=19
 
 branches:
